@@ -325,6 +325,20 @@ public class DelphiPreprocessor {
     }
   }
 
+  public void handlePushOpt() {
+    switchRegistry.pushState(currentSwitches);
+  }
+
+  public void handlePopOpt(int tokenIndex) {
+    Map<SwitchKind, Integer> savedState = switchRegistry.popState();
+    if (savedState != null) {
+      currentSwitches.forEach(
+          (kind, startIndex) -> switchRegistry.addSwitch(kind, startIndex, tokenIndex));
+      currentSwitches.clear();
+      currentSwitches.putAll(savedState);
+    }
+  }
+
   private void registerCurrentCompilerSwitches() {
     if (!tokens.isEmpty()) {
       int lastTokenIndex = Iterables.getLast(tokens).getTokenIndex();

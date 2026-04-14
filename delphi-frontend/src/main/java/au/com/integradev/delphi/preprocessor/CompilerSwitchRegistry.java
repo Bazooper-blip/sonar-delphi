@@ -22,14 +22,21 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Range;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Map;
+import javax.annotation.Nullable;
 import org.sonar.plugins.communitydelphi.api.directive.SwitchDirective.SwitchKind;
 
 public class CompilerSwitchRegistry {
   private final Multimap<SwitchKind, Range<Integer>> rangesBySwitchKind;
+  private final Deque<Map<SwitchKind, Integer>> switchStateStack;
 
   CompilerSwitchRegistry() {
     rangesBySwitchKind = Multimaps.newSetMultimap(Maps.newEnumMap(SwitchKind.class), HashSet::new);
+    switchStateStack = new ArrayDeque<>();
   }
 
   void addSwitch(SwitchKind kind, int startIndex, int endIndex) {
@@ -38,5 +45,17 @@ public class CompilerSwitchRegistry {
 
   public boolean isActiveSwitch(SwitchKind kind, int tokenIndex) {
     return rangesBySwitchKind.get(kind).stream().anyMatch(range -> range.contains(tokenIndex));
+  }
+
+  void pushState(Map<SwitchKind, Integer> currentSwitches) {
+    switchStateStack.push(new EnumMap<>(currentSwitches));
+  }
+
+  @Nullable
+  Map<SwitchKind, Integer> popState() {
+    if (switchStateStack.isEmpty()) {
+      return null;
+    }
+    return switchStateStack.pop();
   }
 }
