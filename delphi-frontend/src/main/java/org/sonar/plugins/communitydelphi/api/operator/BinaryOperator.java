@@ -46,6 +46,8 @@ public enum BinaryOperator implements Operator {
   SHL(DelphiTokenType.SHL, "LeftShift"),
   SHR(DelphiTokenType.SHR, "RightShift"),
   IS(DelphiTokenType.IS),
+  IS_NOT(DelphiTokenType.IS_NOT),
+  NOT_IN(DelphiTokenType.NOT_IN),
   AS(DelphiTokenType.AS);
 
   private static final Map<DelphiTokenType, BinaryOperator> TOKEN_TYPE_MAP =

@@ -74,6 +74,8 @@ tokens {
   TkAnonymousMethodHeading;
   TkLessThanEqual;
   TkGreaterThanEqual;
+  TkIsNot;
+  TkNotIn;
 }
 
 @header
@@ -1029,6 +1031,8 @@ relationalOperator           : '='<BinaryExpressionNodeImpl>
                              | op=lessThanEqualOperator -> {createBinaryExpression(op.getTree())}
                              | op=greaterThanEqualOperator -> {createBinaryExpression(op.getTree())}
                              | '<>'<BinaryExpressionNodeImpl>
+                             | op=isNotOperator -> {createBinaryExpression(op.getTree())}
+                             | op=notInOperator -> {createBinaryExpression(op.getTree())}
                              | IN<BinaryExpressionNodeImpl>
                              | IS<BinaryExpressionNodeImpl>
                              ;
@@ -1040,6 +1044,10 @@ lessThanEqualOperator        : '<' '=' -> ^({combineLastNTokens(TkLessThanEqual,
 // we otherwise couldn't parse since the `>=` token would consume the closing angle bracket of the
 // generic type arguments and the const assignment operator.
 greaterThanEqualOperator     : '>' '=' -> ^({combineLastNTokens(TkGreaterThanEqual, 2)})
+                             ;
+isNotOperator                : IS NOT -> ^({combineLastNTokens(TkIsNot, 2)})
+                             ;
+notInOperator                : NOT IN -> ^({combineLastNTokens(TkNotIn, 2)})
                              ;
 constExpression              : expression
                              | recordExpression

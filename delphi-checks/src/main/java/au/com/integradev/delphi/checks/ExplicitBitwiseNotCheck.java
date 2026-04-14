@@ -34,7 +34,7 @@ import org.sonar.plugins.communitydelphi.api.reporting.QuickFixEdit;
 public class ExplicitBitwiseNotCheck extends DelphiCheck {
   @Override
   public DelphiCheckContext visit(BinaryExpressionNode node, DelphiCheckContext context) {
-    if (node.getOperator() == BinaryOperator.IN) {
+    if (node.getOperator() == BinaryOperator.IN || node.getOperator() == BinaryOperator.NOT_IN) {
       checkBitwiseNot(node.getLeft(), context);
       checkBitwiseNot(node.getRight(), context);
     }

@@ -362,6 +362,11 @@ class GrammarTest {
   }
 
   @Test
+  void testCompoundOperators() {
+    assertParsed("CompoundOperators.pas");
+  }
+
+  @Test
   void testQualifiedExports() {
     assertParsed("QualifiedExports.dpk");
   }
