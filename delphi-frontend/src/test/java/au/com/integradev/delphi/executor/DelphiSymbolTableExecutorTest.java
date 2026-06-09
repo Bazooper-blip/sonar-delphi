@@ -581,9 +581,10 @@ class DelphiSymbolTableExecutorTest {
   @Test
   void testCharsTypeInference() {
     execute("typeInference/Chars.pas");
-    verifyUsages(15, 10, reference(47, 2), reference(49, 2), reference(50, 2));
-    verifyUsages(20, 10, reference(48, 2));
-    verifyUsages(30, 10, reference(52, 2), reference(53, 2));
+    verifyUsages(15, 10, reference(47, 2), reference(49, 2));
+    verifyUsages(20, 10, reference(48, 2), reference(50, 2));
+    verifyUsages(25, 10, reference(53, 2));
+    verifyUsages(30, 10, reference(51, 2), reference(52, 2));
   }
 
   @Test
@@ -1564,7 +1565,7 @@ class DelphiSymbolTableExecutorTest {
             DelphiProperties.COMPILER_TOOLCHAIN_DEFAULT, DelphiProperties.COMPILER_VERSION_DEFAULT);
 
     DelphiFileConfig fileConfig = mock(DelphiFileConfig.class);
-    when(fileConfig.getEncoding()).thenReturn(StandardCharsets.UTF_8.name());
+    when(fileConfig.getCharset()).thenReturn(StandardCharsets.UTF_8);
     when(fileConfig.getPreprocessorFactory()).thenReturn(preprocessorFactory);
     when(fileConfig.getTypeFactory()).thenReturn(typeFactory);
     when(fileConfig.getSearchPath()).thenReturn(SearchPath.create(Collections.emptyList()));
@@ -1582,6 +1583,7 @@ class DelphiSymbolTableExecutorTest {
 
     symbolTable =
         SymbolTable.builder()
+            .charset(StandardCharsets.UTF_8)
             .preprocessorFactory(preprocessorFactory)
             .typeFactory(typeFactory)
             .sourceFiles(sourceFiles)

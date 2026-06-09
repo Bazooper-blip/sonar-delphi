@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.19.0] - 2026-06-09
+
 ### Added
 
 - Support for `noreturn` routines, introduced in Delphi 13.
@@ -16,6 +18,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for implicit `Self` in `Initialize` and `Finalize` operators, introduced in Delphi 13.
 - Support for `DCCARM64EC` toolchain, introduced in Delphi 13.1.
 - `NoreturnContract` analysis rule, which flags `noreturn` routines that return normally.
+- Full support for the `HIGHCHARUNICODE` compiler directive.
+- Support for the `DCC_CodePage` property in dproj files.
+- `sonar.delphi.codePage` property to specify the code page that will be used to interpret ANSI data.
+
+### Changed
+
+- The ANSI encoding configured by `sonar.delphi.codePage` or inferred from `DCC_CodePage` is now
+  preferred over the system encoding when parsing source files.
+- Metrics are no longer reported on test sources.
+- Duplications are no longer reported on test sources.
+- Coverage data is no longer reported on test sources.
+
+### Fixed
+
+- The configured `sonar.sourceEncoding` was never used for search path units.
+- Quick fixes removing too much surrounding code in `RedundantInherited`.
 
 ## [1.18.3] - 2025-11-11
 
@@ -1682,7 +1700,8 @@ that are virtual, abstract, or on an interface.
 - False-positives in 13 rules.
 - Logic errors in existing "semantic analysis" that caused scan failures.
 
-[Unreleased]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.18.3...HEAD
+[Unreleased]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.19.0...HEAD
+[1.19.0]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.18.3...v1.19.0
 [1.18.3]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.18.2...v1.18.3
 [1.18.2]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.18.1...v1.18.2
 [1.18.1]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.18.0...v1.18.1
