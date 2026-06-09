@@ -19,6 +19,14 @@
 package au.com.integradev.delphi.compiler;
 
 public enum Architecture {
-  X86,
-  X64
+  X86(Bitness.BIT_32),
+  X64(Bitness.BIT_64),
+  ARM32(Bitness.BIT_32),
+  ARM64(Bitness.BIT_64);
+
+  public final Bitness bitness;
+
+  Architecture(Bitness bitness) {
+    this.bitness = bitness;
+  }
 }

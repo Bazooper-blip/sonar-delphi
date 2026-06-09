@@ -20,7 +20,9 @@ package au.com.integradev.delphi.checks;
 
 import au.com.integradev.delphi.cfg.api.Block;
 import au.com.integradev.delphi.cfg.api.ControlFlowGraph;
+import au.com.integradev.delphi.cfg.api.ExceptionalRoutineExit;
 import au.com.integradev.delphi.cfg.api.Finally;
+import au.com.integradev.delphi.cfg.api.RoutineExit;
 import au.com.integradev.delphi.cfg.api.Terminated;
 import au.com.integradev.delphi.cfg.api.UnconditionalJump;
 import au.com.integradev.delphi.utils.ControlFlowGraphUtils;
@@ -132,13 +134,19 @@ public class RedundantJumpCheck extends DelphiCheck {
         // if the finally block cannot be found, we have traversed outside the scope of the cfg
         break;
       }
-      if (!finallyBlock.getSuccessor().equals(finallyBlock.getExceptionSuccessor())) {
-        // multiple paths after the finally corresponds to code that would be skipped from the jump
+
+      if (isNotFinallyAtEndOfRoutine(finallyBlock)) {
         return false;
       }
     }
     // if no invalidating try-finally blocks are found, the use is a violation
     return true;
+  }
+
+  private static boolean isNotFinallyAtEndOfRoutine(Finally finallyBlock) {
+    return !finallyBlock.getSuccessor().equals(finallyBlock.getExceptionSuccessor())
+        && !(finallyBlock.getSuccessor() instanceof RoutineExit
+            && finallyBlock.getExceptionSuccessor() instanceof ExceptionalRoutineExit);
   }
 
   private static Finally findFinallyBlock(ControlFlowGraph cfg, FinallyBlockNode element) {

@@ -66,7 +66,8 @@ class DelphiFileTest {
 
     DelphiFileConfig config =
         DelphiFile.createConfig(
-            StandardCharsets.UTF_8.name(),
+            StandardCharsets.UTF_8,
+            StandardCharsets.UTF_8,
             new DelphiPreprocessorFactory(
                 DelphiProperties.COMPILER_VERSION_DEFAULT, Platform.WINDOWS),
             TypeFactoryUtils.defaultFactory(),
@@ -83,7 +84,8 @@ class DelphiFileTest {
 
     DelphiFileConfig config =
         DelphiFile.createConfig(
-            StandardCharsets.UTF_8.name(),
+            StandardCharsets.UTF_8,
+            StandardCharsets.UTF_8,
             new DelphiPreprocessorFactory(
                 DelphiProperties.COMPILER_VERSION_DEFAULT, Platform.WINDOWS),
             TypeFactoryUtils.defaultFactory(),
@@ -100,7 +102,8 @@ class DelphiFileTest {
 
     DelphiFileConfig config =
         DelphiFile.createConfig(
-            StandardCharsets.UTF_8.name(),
+            StandardCharsets.UTF_8,
+            StandardCharsets.UTF_8,
             new DelphiPreprocessorFactory(
                 DelphiProperties.COMPILER_VERSION_DEFAULT, Platform.WINDOWS),
             TypeFactoryUtils.defaultFactory(),
@@ -112,6 +115,27 @@ class DelphiFileTest {
     assertThat(firstLine).doesNotStartWith("\ufeff");
   }
 
+  @Test
+  void testCharsetShouldDecodeShiftJisFile() {
+    File file = DelphiUtils.getResource("/au/com/integradev/delphi/file/ShiftJis.pas");
+    Charset shiftJis = Charset.forName("windows-31j");
+
+    DelphiFileConfig config =
+        DelphiFile.createConfig(
+            shiftJis,
+            shiftJis,
+            new DelphiPreprocessorFactory(
+                DelphiProperties.COMPILER_VERSION_DEFAULT, Platform.WINDOWS),
+            TypeFactoryUtils.defaultFactory(),
+            SearchPath.create(Collections.emptyList()),
+            Collections.emptySet());
+
+    DelphiFile delphiFile = DelphiFile.from(file, config);
+    assertThat(delphiFile.getSourceCodeFileCharset()).isEqualTo(shiftJis);
+    assertThat(delphiFile.getSourceCodeFileLines().get(1)).isEqualTo("カスタマイズ");
+    assertThat(delphiFile.getSourceCodeFileLines().get(3)).isEqualTo("unit Consts;");
+  }
+
   @ParameterizedTest
   @ValueSource(strings = {"SkipImplementation.pas", "SkipImplementationWithDirectiveNesting.pas"})
   void testShouldSkipImplementation(String filename) {
@@ -119,7 +143,8 @@ class DelphiFileTest {
 
     DelphiFileConfig config =
         DelphiFile.createConfig(
-            StandardCharsets.UTF_8.name(),
+            StandardCharsets.UTF_8,
+            StandardCharsets.UTF_8,
             new DelphiPreprocessorFactory(
                 DelphiProperties.COMPILER_VERSION_DEFAULT, Platform.WINDOWS),
             TypeFactoryUtils.defaultFactory(),
