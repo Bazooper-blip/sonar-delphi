@@ -20,7 +20,6 @@ package au.com.integradev.delphi;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -32,14 +31,14 @@ import au.com.integradev.delphi.core.Delphi;
 import au.com.integradev.delphi.coverage.DelphiCodeCoverageParser;
 import au.com.integradev.delphi.coverage.DelphiCoverageParser;
 import au.com.integradev.delphi.coverage.DelphiCoverageParserFactory;
-import au.com.integradev.delphi.msbuild.DelphiProjectHelper;
 import au.com.integradev.delphi.utils.DelphiUtils;
 import java.io.File;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.DefaultFileSystem;
-import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.batch.sensor.internal.DefaultSensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 
 class DelphiCoverageSensorTest {
@@ -49,7 +48,6 @@ class DelphiCoverageSensorTest {
 
   private final DefaultFileSystem fileSystem = new DefaultFileSystem(BASE_DIR);
   private final SensorContextTester context = SensorContextTester.create(fileSystem.baseDir());
-  private final DelphiProjectHelper delphiProjectHelper = mock(DelphiProjectHelper.class);
   private final DelphiCoverageParserFactory coverageParserFactory =
       mock(DelphiCoverageParserFactory.class);
   private final DelphiCoverageParser coverageParser = mock(DelphiCodeCoverageParser.class);
@@ -58,8 +56,7 @@ class DelphiCoverageSensorTest {
 
   @BeforeEach
   void setupSensor() {
-    sensor = new DelphiCoverageSensor(delphiProjectHelper, coverageParserFactory);
-    when(delphiProjectHelper.shouldExecuteOnProject()).thenReturn(true);
+    sensor = new DelphiCoverageSensor(coverageParserFactory);
     when(coverageParserFactory.create()).thenReturn(coverageParser);
   }
 
@@ -71,13 +68,13 @@ class DelphiCoverageSensorTest {
 
   @Test
   void testDescribe() {
-    final SensorDescriptor mockDescriptor = mock(SensorDescriptor.class);
-    when(mockDescriptor.onlyOnLanguage(anyString())).thenReturn(mockDescriptor);
+    final DefaultSensorDescriptor descriptor = new DefaultSensorDescriptor();
 
-    sensor.describe(mockDescriptor);
+    sensor.describe(descriptor);
 
-    verify(mockDescriptor).onlyOnLanguage(Delphi.KEY);
-    verify(mockDescriptor).name("DelphiCoverageSensor");
+    assertThat(descriptor.name()).isEqualTo("DelphiCoverageSensor");
+    assertThat(descriptor.languages()).containsExactly(Delphi.KEY);
+    assertThat(descriptor.type()).isEqualTo(InputFile.Type.MAIN);
   }
 
   @Test

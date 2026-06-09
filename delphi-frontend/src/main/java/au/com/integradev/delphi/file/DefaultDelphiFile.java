@@ -21,6 +21,7 @@ package au.com.integradev.delphi.file;
 import au.com.integradev.delphi.preprocessor.CompilerSwitchRegistry;
 import au.com.integradev.delphi.preprocessor.TextBlockLineEndingModeRegistry;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.List;
 import org.sonar.plugins.communitydelphi.api.ast.DelphiAst;
 import org.sonar.plugins.communitydelphi.api.token.DelphiToken;
@@ -35,7 +36,8 @@ class DefaultDelphiFile implements DelphiFile {
   private CompilerSwitchRegistry switchRegistry;
   private TextBlockLineEndingModeRegistry textBlockLineEndingModeRegistry;
   private TypeFactory typeFactory;
-  private String encoding;
+  private Charset charset;
+  private Charset ansiCharset;
 
   DefaultDelphiFile() {
     // package-private constructor
@@ -52,8 +54,13 @@ class DefaultDelphiFile implements DelphiFile {
   }
 
   @Override
-  public String getSourceCodeFileEncoding() {
-    return encoding;
+  public Charset getSourceCodeFileCharset() {
+    return charset;
+  }
+
+  @Override
+  public Charset getAnsiCharset() {
+    return ansiCharset;
   }
 
   @Override
@@ -94,8 +101,12 @@ class DefaultDelphiFile implements DelphiFile {
     this.sourceCodeLines = List.copyOf(sourceCodeLines);
   }
 
-  void setSourceCodeEncoding(String encoding) {
-    this.encoding = encoding;
+  void setSourceCodeCharset(Charset charset) {
+    this.charset = charset;
+  }
+
+  void setAnsiCharset(Charset ansiCharset) {
+    this.ansiCharset = ansiCharset;
   }
 
   void setAst(DelphiAst ast) {

@@ -86,11 +86,9 @@ public class DelphiSensor implements Sensor {
   /** The actual sensor code. */
   @Override
   public void execute(@Nonnull SensorContext context) {
-    if (shouldExecuteOnProject()) {
-      executor.setup();
-      executeOnFiles(context);
-      executor.complete();
-    }
+    executor.setup();
+    executeOnFiles(context);
+    executor.complete();
   }
 
   private void executeOnFiles(SensorContext sensorContext) {
@@ -115,7 +113,8 @@ public class DelphiSensor implements Sensor {
             .typeFactory(typeFactory)
             .sourceFiles(sourceFiles)
             .referencedFiles(referencedFiles)
-            .encoding(delphiProjectHelper.encoding())
+            .charset(delphiProjectHelper.getCharset())
+            .ansiCharset(delphiProjectHelper.getAnsiCharset())
             .searchPath(searchPath)
             .conditionalDefines(delphiProjectHelper.getConditionalDefines())
             .unitScopeNames(delphiProjectHelper.getUnitScopeNames())
@@ -132,7 +131,8 @@ public class DelphiSensor implements Sensor {
     ExecutorContext executorContext = new ExecutorContext(sensorContext, symbolTable);
     DelphiFileConfig config =
         DelphiFile.createConfig(
-            delphiProjectHelper.encoding(),
+            delphiProjectHelper.getCharset(),
+            delphiProjectHelper.getAnsiCharset(),
             preprocessorFactory,
             typeFactory,
             searchPath,
@@ -210,10 +210,6 @@ public class DelphiSensor implements Sensor {
     searchPathDirectories.addAll(delphiProjectHelper.getLibraryPathDirectories());
     searchPathDirectories.addAll(delphiProjectHelper.getBrowsingPathDirectories());
     return SearchPath.create(searchPathDirectories);
-  }
-
-  private boolean shouldExecuteOnProject() {
-    return delphiProjectHelper.shouldExecuteOnProject();
   }
 
   @Override

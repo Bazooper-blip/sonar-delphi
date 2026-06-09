@@ -27,6 +27,10 @@ public interface Constraint {
 
   interface RecordConstraint extends Constraint {}
 
+  interface InterfaceConstraint extends Constraint {}
+
+  interface UnmanagedConstraint extends Constraint {}
+
   interface TypeConstraint extends Constraint {
     Type type();
   }
