@@ -23,6 +23,7 @@ import au.com.integradev.delphi.symbol.resolve.ExpressionTypeResolver;
 import javax.annotation.Nonnull;
 import org.antlr.runtime.Token;
 import org.sonar.plugins.communitydelphi.api.ast.BinaryExpressionNode;
+import org.sonar.plugins.communitydelphi.api.ast.BinaryOperatorNode;
 import org.sonar.plugins.communitydelphi.api.ast.ExpressionNode;
 import org.sonar.plugins.communitydelphi.api.operator.BinaryOperator;
 import org.sonar.plugins.communitydelphi.api.type.Type;
@@ -30,10 +31,13 @@ import org.sonar.plugins.communitydelphi.api.type.Type;
 public final class BinaryExpressionNodeImpl extends ExpressionNodeImpl
     implements BinaryExpressionNode {
   private String image;
-  private BinaryOperator operator;
 
   public BinaryExpressionNodeImpl(Token token) {
     super(token);
+  }
+
+  public BinaryExpressionNodeImpl(int tokenType) {
+    super(tokenType);
   }
 
   @Override
@@ -47,22 +51,25 @@ public final class BinaryExpressionNodeImpl extends ExpressionNodeImpl
   }
 
   @Override
+  public BinaryOperatorNode getOperatorNode() {
+    return (BinaryOperatorNode) getChild(1);
+  }
+
+  @Override
   public ExpressionNode getRight() {
-    return (ExpressionNode) getChild(1);
+    return (ExpressionNode) getChild(2);
   }
 
   @Override
   public BinaryOperator getOperator() {
-    if (operator == null) {
-      operator = BinaryOperator.fromTokenType(getTokenType());
-    }
-    return operator;
+    return getOperatorNode().getOperator();
   }
 
   @Override
   public String getImage() {
     if (image == null) {
-      image = getLeft().getImage() + " " + getToken().getImage() + " " + getRight().getImage();
+      image =
+          getLeft().getImage() + " " + getOperatorNode().getImage() + " " + getRight().getImage();
     }
     return image;
   }

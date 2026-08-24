@@ -43,6 +43,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.support.ParameterDeclarations;
 import org.sonar.plugins.communitydelphi.api.ast.CommonDelphiNode;
 import org.sonar.plugins.communitydelphi.api.ast.ExpressionNode;
 import org.sonar.plugins.communitydelphi.api.type.IntrinsicType;
@@ -56,9 +57,10 @@ class TypeInferrerTest {
 
   static class ArrayConstructorArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return Stream.of(
-          Arguments.of(arrayConstructor(), dynamicArrayType(TypeFactory.voidType())),
+          Arguments.of(arrayConstructor(), TypeFactory.unknownType()),
           Arguments.of(
               arrayConstructor(integerLiteral("127")), dynamicArrayType(IntrinsicType.INTEGER)),
           Arguments.of(
@@ -111,7 +113,7 @@ class TypeInferrerTest {
                   integerLiteral("32768"),
                   integerLiteral("2147483647"),
                   integerLiteral("2147483648")),
-              dynamicArrayType(IntrinsicType.CARDINAL)),
+              dynamicArrayType(IntrinsicType.INT64)),
           Arguments.of(
               arrayConstructor(
                   integerLiteral("127"),
@@ -123,7 +125,7 @@ class TypeInferrerTest {
                   integerLiteral("2147483647"),
                   integerLiteral("2147483648"),
                   integerLiteral("4294967295")),
-              dynamicArrayType(IntrinsicType.CARDINAL)),
+              dynamicArrayType(IntrinsicType.INT64)),
           Arguments.of(
               arrayConstructor(
                   integerLiteral("127"),
@@ -171,7 +173,8 @@ class TypeInferrerTest {
 
   static class IntegerArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return Stream.of(
           Arguments.of(integerLiteral("-2147483649"), intrinsicType(IntrinsicType.INT64)),
           Arguments.of(integerLiteral("-2147483648"), intrinsicType(IntrinsicType.INTEGER)),
@@ -198,7 +201,8 @@ class TypeInferrerTest {
 
   static class ProceduralArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       Type integer = intrinsicType(IntrinsicType.INTEGER);
       ExpressionNode voidProcedural = procedural(TypeFactory.voidType());
 
@@ -210,7 +214,8 @@ class TypeInferrerTest {
 
   static class RealArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       Type extended = intrinsicType(IntrinsicType.EXTENDED);
       Type comp = intrinsicType(IntrinsicType.COMP);
       Type currency = intrinsicType(IntrinsicType.CURRENCY);

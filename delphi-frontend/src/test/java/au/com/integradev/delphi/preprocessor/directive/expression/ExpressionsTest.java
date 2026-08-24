@@ -18,6 +18,7 @@
  */
 package au.com.integradev.delphi.preprocessor.directive.expression;
 
+import static au.com.integradev.delphi.preprocessor.directive.expression.Expression.ConstExpressionType.NON_CONSTANT;
 import static au.com.integradev.delphi.preprocessor.directive.expression.Expression.ConstExpressionType.UNKNOWN;
 import static au.com.integradev.delphi.preprocessor.directive.expression.Expressions.binary;
 import static au.com.integradev.delphi.preprocessor.directive.expression.Expressions.literal;
@@ -43,6 +44,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.support.ParameterDeclarations;
 import org.sonar.plugins.communitydelphi.api.type.IntrinsicType;
 import org.sonar.plugins.communitydelphi.api.type.TypeFactory;
 
@@ -50,7 +52,8 @@ class ExpressionsTest {
 
   static class NumericExpressionArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return Stream.of(
           Arguments.of("$26E", 622),
           Arguments.of("%10011_01110", 622),
@@ -64,7 +67,8 @@ class ExpressionsTest {
 
   static class IntegerMathArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return Stream.of(
           Arguments.of("1 + 2", 3),
           Arguments.of("1 - 2", -1),
@@ -81,7 +85,8 @@ class ExpressionsTest {
 
   static class RealMathArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return Stream.of(
           Arguments.of("1 + 2", 3.0),
           Arguments.of("5 / 2", 2.5),
@@ -95,7 +100,8 @@ class ExpressionsTest {
 
   static class StringArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return Stream.of(
           Arguments.of("'My string'", "My string"),
           Arguments.of("'Escaped '' single-quotes'", "Escaped ' single-quotes"),
@@ -106,7 +112,8 @@ class ExpressionsTest {
 
   static class StringConcatenationArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return Stream.of(
           Arguments.of("'abc' + '123'", "abc123"),
           Arguments.of("'abc' + ''", "abc"),
@@ -116,7 +123,8 @@ class ExpressionsTest {
 
   static class EqualityArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return Stream.of(
           Arguments.of("1 = 1", true),
           Arguments.of("1 = 2", false),
@@ -129,16 +137,16 @@ class ExpressionsTest {
           Arguments.of("$ = 0", true),
           Arguments.of("%_ = 0", true),
           Arguments.of("$_ = 0", true),
-          Arguments.of("_ = 0", UNKNOWN),
+          Arguments.of("_ = 0", NON_CONSTANT),
           Arguments.of("'my string' = 'my string'", true),
           Arguments.of("'my string' = 'MY STRING'", false),
           Arguments.of("'1' = 1", false),
           Arguments.of("'1.0' = 1.0", false),
           Arguments.of("[1, 2, 3] = [1, 2, 3]", true),
           Arguments.of("[1, 2, 3] = [4, 5, 6]", false),
-          Arguments.of("UNKNOWN = 5", UNKNOWN),
-          Arguments.of("5 = UNKNOWN", UNKNOWN),
-          Arguments.of("UNKNOWN = UNKNOWN", UNKNOWN),
+          Arguments.of("UNKNOWN = 5", NON_CONSTANT),
+          Arguments.of("5 = UNKNOWN", NON_CONSTANT),
+          Arguments.of("UNKNOWN = UNKNOWN", NON_CONSTANT),
           Arguments.of("1 <> 1", false),
           Arguments.of("1 <> 2", true),
           Arguments.of("1 <> 1.0", false),
@@ -152,15 +160,16 @@ class ExpressionsTest {
           Arguments.of("'1.0' <> 1.0", true),
           Arguments.of("[1, 2, 3] <> [1, 2, 3]", false),
           Arguments.of("[1, 2, 3] <> [4, 5, 6]", true),
-          Arguments.of("UNKNOWN <> 5", UNKNOWN),
-          Arguments.of("5 <> UNKNOWN", UNKNOWN),
-          Arguments.of("UNKNOWN <> UNKNOWN", UNKNOWN));
+          Arguments.of("UNKNOWN <> 5", NON_CONSTANT),
+          Arguments.of("5 <> UNKNOWN", NON_CONSTANT),
+          Arguments.of("UNKNOWN <> UNKNOWN", NON_CONSTANT));
     }
   }
 
   static class ComparisonArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return Stream.of(
           Arguments.of("1 > 1", false),
           Arguments.of("2 > 1", true),
@@ -169,7 +178,7 @@ class ExpressionsTest {
           Arguments.of("2.0 > 1.0", true),
           Arguments.of("'1.0' > 1.0", UNKNOWN),
           Arguments.of("2.0 > '1.0'", UNKNOWN),
-          Arguments.of("'2.0' > '1.0'", UNKNOWN),
+          Arguments.of("'2.0' > '1.0'", true),
           Arguments.of("1 < 1", false),
           Arguments.of("1 < 2", true),
           Arguments.of("1 < 1.0", false),
@@ -177,7 +186,7 @@ class ExpressionsTest {
           Arguments.of("1.0 < 2.0", true),
           Arguments.of("'1.0' < 1.0", UNKNOWN),
           Arguments.of("2.0 < '1.0'", UNKNOWN),
-          Arguments.of("'2.0' < '1.0'", UNKNOWN),
+          Arguments.of("'2.0' < '1.0'", false),
           Arguments.of("1 >= 1", true),
           Arguments.of("1 >= 2", false),
           Arguments.of("1 >= 1.0", true),
@@ -188,7 +197,7 @@ class ExpressionsTest {
           Arguments.of("[1, 2, 3] >= [1, 2, 3, 4, 5, 6]", false),
           Arguments.of("'1.0' >= 1.0", UNKNOWN),
           Arguments.of("2.0 >= '1.0'", UNKNOWN),
-          Arguments.of("'2.0' >= '1.0'", UNKNOWN),
+          Arguments.of("'2.0' >= '1.0'", true),
           Arguments.of("[1, 2, 3] >= '[1, 2, 3]'", UNKNOWN),
           Arguments.of("'[1, 2, 3]' >= [1, 2, 3]", UNKNOWN),
           Arguments.of("1 <= 1", true),
@@ -201,7 +210,7 @@ class ExpressionsTest {
           Arguments.of("[1, 2, 3] <= [1, 2, 3, 4, 5, 6]", true),
           Arguments.of("'1.0' <= 1.0", UNKNOWN),
           Arguments.of("2.0 <= '1.0'", UNKNOWN),
-          Arguments.of("'2.0' <= '1.0'", UNKNOWN),
+          Arguments.of("'2.0' <= '1.0'", false),
           Arguments.of("[1, 2, 3] <= '[1, 2, 3]'", UNKNOWN),
           Arguments.of("'[1, 2, 3]' <= [1, 2, 3]", UNKNOWN));
     }
@@ -209,12 +218,26 @@ class ExpressionsTest {
 
   static class LogicalOperatorsArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return Stream.of(
           Arguments.of("1 in [1, 2, 3]", true),
           Arguments.of("1 in [2, 3]", false),
           Arguments.of("1 in []", false),
           Arguments.of("1 in 1", UNKNOWN),
+          Arguments.of("1 not in [1, 2, 3]", false),
+          Arguments.of("1 not in [2, 3]", true),
+          Arguments.of("1 not in []", true),
+          Arguments.of("1 not in 1", UNKNOWN),
+          Arguments.of("Foo is TObject", NON_CONSTANT),
+          Arguments.of("Foo is not TObject", NON_CONSTANT),
+          Arguments.of("not (Foo is TObject)", NON_CONSTANT),
+          Arguments.of("not Foo", UNKNOWN),
+          Arguments.of("Foo = 1", NON_CONSTANT),
+          Arguments.of("(Foo is TObject) and False", NON_CONSTANT),
+          Arguments.of("False and (Foo is TObject)", false),
+          Arguments.of("True or (Foo is TObject)", true),
+          Arguments.of("False and 1", false),
           Arguments.of("True and System.True", true),
           Arguments.of("True and False", false),
           Arguments.of("False and System.False", false),
@@ -224,7 +247,7 @@ class ExpressionsTest {
           Arguments.of("False or True", true),
           Arguments.of("True or False", true),
           Arguments.of("False or False", false),
-          Arguments.of("True or 1", UNKNOWN),
+          Arguments.of("True or 1", true),
           Arguments.of("1 or True", UNKNOWN),
           Arguments.of("True xor True", false),
           Arguments.of("True xor False", true),
@@ -237,7 +260,8 @@ class ExpressionsTest {
 
   static class UnaryEvaluationArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return Stream.of(
           Arguments.of("+1", 1),
           Arguments.of("-1", -1),
@@ -255,7 +279,8 @@ class ExpressionsTest {
 
   static class DefinedArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return addSystemQualifier(
           Stream.of(
               Arguments.of("Defined(TEST_DEFINE)", true),
@@ -267,7 +292,8 @@ class ExpressionsTest {
 
   static class SizeOfArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return addSystemQualifier(
           Stream.of(
               Arguments.of("SizeOf(Byte)", size(IntrinsicType.BYTE)),
@@ -290,7 +316,8 @@ class ExpressionsTest {
 
   static class CompilerVersionArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<Arguments> provideArguments(ExtensionContext context) {
+    public Stream<Arguments> provideArguments(
+        ParameterDeclarations parameters, ExtensionContext context) {
       return addSystemQualifier(Stream.of(Arguments.of("CompilerVersion", 30.0)));
     }
   }
@@ -357,8 +384,8 @@ class ExpressionsTest {
 
     ExpressionValue value = expression.evaluate(preprocessor);
 
-    if (expected == UNKNOWN) {
-      assertThat(value.type()).isEqualTo(UNKNOWN);
+    if (expected == UNKNOWN || expected == NON_CONSTANT) {
+      assertThat(value.type()).isEqualTo(expected);
     } else if (expected instanceof String) {
       assertThat(value.asString()).isEqualTo(expected);
     } else if (expected instanceof Integer) {
