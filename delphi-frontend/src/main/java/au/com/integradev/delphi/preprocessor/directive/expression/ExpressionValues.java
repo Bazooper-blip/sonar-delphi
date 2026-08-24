@@ -20,6 +20,7 @@ package au.com.integradev.delphi.preprocessor.directive.expression;
 
 import static au.com.integradev.delphi.preprocessor.directive.expression.Expression.ConstExpressionType.BOOLEAN;
 import static au.com.integradev.delphi.preprocessor.directive.expression.Expression.ConstExpressionType.INTEGER;
+import static au.com.integradev.delphi.preprocessor.directive.expression.Expression.ConstExpressionType.NON_CONSTANT;
 import static au.com.integradev.delphi.preprocessor.directive.expression.Expression.ConstExpressionType.REAL;
 import static au.com.integradev.delphi.preprocessor.directive.expression.Expression.ConstExpressionType.SET;
 import static au.com.integradev.delphi.preprocessor.directive.expression.Expression.ConstExpressionType.STRING;
@@ -39,6 +40,7 @@ import java.util.function.IntBinaryOperator;
 
 final class ExpressionValues {
   private static final ExpressionValue UNKNOWN_VALUE = () -> UNKNOWN;
+  private static final ExpressionValue NON_CONSTANT_VALUE = () -> NON_CONSTANT;
 
   private ExpressionValues() {
     // Utility class
@@ -46,6 +48,14 @@ final class ExpressionValues {
 
   static ExpressionValue unknownValue() {
     return UNKNOWN_VALUE;
+  }
+
+  static ExpressionValue nonConstantValue() {
+    return NON_CONSTANT_VALUE;
+  }
+
+  private static boolean isUnevaluable(ExpressionValue value) {
+    return value.type() == UNKNOWN || value.type() == NON_CONSTANT;
   }
 
   static ExpressionValue createInteger(long value) {
@@ -133,8 +143,8 @@ final class ExpressionValues {
   }
 
   static ExpressionValue isEqual(ExpressionValue left, ExpressionValue right) {
-    if (left.type() == UNKNOWN || right.type() == UNKNOWN) {
-      return unknownValue();
+    if (isUnevaluable(left) || isUnevaluable(right)) {
+      return nonConstantValue();
     }
 
     if (isNumeric(left) && isNumeric(right)) {
@@ -147,33 +157,55 @@ final class ExpressionValues {
   }
 
   static ExpressionValue greaterThan(ExpressionValue left, ExpressionValue right) {
+    if (isUnevaluable(left) || isUnevaluable(right)) {
+      return nonConstantValue();
+    }
     if (isNumeric(left) && isNumeric(right)) {
       return createBoolean(left.asDouble() > right.asDouble());
+    }
+    if (left.type() == STRING && right.type() == STRING) {
+      return createBoolean(left.asString().compareTo(right.asString()) > 0);
     }
     return unknownValue();
   }
 
   static ExpressionValue lessThan(ExpressionValue left, ExpressionValue right) {
+    if (isUnevaluable(left) || isUnevaluable(right)) {
+      return nonConstantValue();
+    }
     if (isNumeric(left) && isNumeric(right)) {
       return createBoolean(left.asDouble() < right.asDouble());
+    }
+    if (left.type() == STRING && right.type() == STRING) {
+      return createBoolean(left.asString().compareTo(right.asString()) < 0);
     }
     return unknownValue();
   }
 
   static ExpressionValue greaterThanEqual(ExpressionValue left, ExpressionValue right) {
+    if (isUnevaluable(left) || isUnevaluable(right)) {
+      return nonConstantValue();
+    }
     if (isNumeric(left) && isNumeric(right)) {
       return createBoolean(left.asDouble() >= right.asDouble());
     } else if (left.type() == SET && right.type() == SET) {
       return createBoolean(left.asSet().containsAll(right.asSet()));
+    } else if (left.type() == STRING && right.type() == STRING) {
+      return createBoolean(left.asString().compareTo(right.asString()) >= 0);
     }
     return unknownValue();
   }
 
   static ExpressionValue lessThanEqual(ExpressionValue left, ExpressionValue right) {
+    if (isUnevaluable(left) || isUnevaluable(right)) {
+      return nonConstantValue();
+    }
     if (isNumeric(left) && isNumeric(right)) {
       return createBoolean(left.asDouble() <= right.asDouble());
     } else if (left.type() == SET && right.type() == SET) {
       return createBoolean(right.asSet().containsAll(left.asSet()));
+    } else if (left.type() == STRING && right.type() == STRING) {
+      return createBoolean(left.asString().compareTo(right.asString()) <= 0);
     }
     return unknownValue();
   }
@@ -183,22 +215,49 @@ final class ExpressionValues {
   }
 
   static ExpressionValue in(ExpressionValue left, ExpressionValue right) {
+    if (isUnevaluable(left) || isUnevaluable(right)) {
+      return nonConstantValue();
+    }
     if (right.type() == SET) {
       return createBoolean(right.asSet().contains(left));
     }
     return unknownValue();
   }
 
+  static ExpressionValue notIn(ExpressionValue left, ExpressionValue right) {
+    return not(in(left, right));
+  }
+
+  static ExpressionValue is(ExpressionValue left, ExpressionValue right) {
+    return nonConstantValue();
+  }
+
+  static ExpressionValue isNot(ExpressionValue left, ExpressionValue right) {
+    return nonConstantValue();
+  }
+
   static ExpressionValue and(ExpressionValue left, ExpressionValue right) {
+    if (left.type() == BOOLEAN && !left.asBoolean()) {
+      return createBoolean(false);
+    }
     if (left.type() == BOOLEAN && right.type() == BOOLEAN) {
       return createBoolean(left.asBoolean() && right.asBoolean());
+    }
+    if (left.type() == NON_CONSTANT || (left.type() == BOOLEAN && right.type() == NON_CONSTANT)) {
+      return nonConstantValue();
     }
     return unknownValue();
   }
 
   static ExpressionValue or(ExpressionValue left, ExpressionValue right) {
+    if (left.type() == BOOLEAN && left.asBoolean()) {
+      return createBoolean(true);
+    }
     if (left.type() == BOOLEAN && right.type() == BOOLEAN) {
       return createBoolean(left.asBoolean() || right.asBoolean());
+    }
+    if (left.type() == NON_CONSTANT || (left.type() == BOOLEAN && right.type() == NON_CONSTANT)) {
+      return nonConstantValue();
     }
     return unknownValue();
   }
@@ -206,6 +265,9 @@ final class ExpressionValues {
   static ExpressionValue xor(ExpressionValue left, ExpressionValue right) {
     if (left.type() == BOOLEAN && right.type() == BOOLEAN) {
       return createBoolean(left.asBoolean() ^ right.asBoolean());
+    }
+    if (left.type() == NON_CONSTANT || right.type() == NON_CONSTANT) {
+      return nonConstantValue();
     }
     return unknownValue();
   }
@@ -226,6 +288,8 @@ final class ExpressionValues {
         return createReal(-value.asDouble());
       case BOOLEAN:
         return createBoolean(!value.asBoolean());
+      case NON_CONSTANT:
+        return nonConstantValue();
       default:
         return unknownValue();
     }
@@ -234,6 +298,9 @@ final class ExpressionValues {
   static ExpressionValue not(ExpressionValue value) {
     if (value.type() == BOOLEAN) {
       return createBoolean(!value.asBoolean());
+    }
+    if (value.type() == NON_CONSTANT) {
+      return nonConstantValue();
     }
     return unknownValue();
   }

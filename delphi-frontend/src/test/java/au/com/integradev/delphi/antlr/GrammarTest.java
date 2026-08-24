@@ -371,4 +371,19 @@ class GrammarTest {
   void testGenericConstraints() {
     assertParsed("GenericConstraints.pas");
   }
+
+  @Test
+  void testIfExpressions() {
+    assertParsed("IfExpressions.pas");
+  }
+
+  @Test
+  void testIsNotOperator() {
+    assertParsed("IsNotOperator.pas");
+  }
+
+  @Test
+  void testNotInOperator() {
+    assertParsed("NotInOperator.pas");
+  }
 }

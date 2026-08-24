@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for the `is not` operator, introduced in Delphi 13.
+- Support for the `not in` operator, introduced in Delphi 13.
+- **API:** `OperatorNode` node type.
+- **API:** `BinaryOperatorNode` node type.
+- **API:** `UnaryOperatorNode` node type.
+- **API:** `DelphiTokenType.BINARY_EXPRESSION` token type.
+- **API:** `DelphiTokenType.UNARY_EXPRESSION` token type.
+- **API:** `DelphiTokenType.IS_NOT` token type.
+- **API:** `DelphiTokenType.NOT_IN` token type.
+- **API:** `BinaryOperator.IS_NOT` enum value.
+- **API:** `BinaryOperator.NOT_IN` enum value.
+- **API:** `BinaryExpressionNode.getOperatorNode` method.
+- **API:** `UnaryExpressionNode.getOperatorNode` method.
+- Support for string ordering comparisons in conditional directive expressions.
+
+### Changed
+
+- The `BinaryExpressionNode` AST node is now rooted on the `BINARY_EXPRESSION` token and contains
+  the operator as a child node.
+- The `UnaryExpressionNode` AST node is now rooted on the `UNARY_EXPRESSION` token and contains the
+  operator as a child node.
+
+### Fixed
+
+- Incorrect token image on `>=` and `<=` operators.
+- Incorrect branch selection around `{$IF}` conditions that can't be evaluated at compile time.
+
+## [1.20.0] - 2026-08-12
+
+### Added
+
+- Support for
+  [resolving issues in code](https://docs.sonarsource.com/sonarqube-server/user-guide/issues/managing#resolving-in-code)
+  with `sonar-resolve` comments.
+- Support for `if` expressions, introduced in Delphi 13.
+- **API:** `IfExpressionNode` node type.
+
+### Fixed
+
+- Incorrect array literal type inference around mixed...
+  - integer elements
+  - boolean elements
+  - character elements
+  - class elements
+  - interface elements
+
 ## [1.19.0] - 2026-06-09
 
 ### Added
@@ -1700,7 +1748,8 @@ that are virtual, abstract, or on an interface.
 - False-positives in 13 rules.
 - Logic errors in existing "semantic analysis" that caused scan failures.
 
-[Unreleased]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.19.0...HEAD
+[Unreleased]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.20.0...HEAD
+[1.20.0]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.19.0...v1.20.0
 [1.19.0]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.18.3...v1.19.0
 [1.18.3]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.18.2...v1.18.3
 [1.18.2]: https://github.com/integrated-application-development/sonar-delphi/compare/v1.18.1...v1.18.2
